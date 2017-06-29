@@ -1,9 +1,15 @@
+/*
+*	APRS Spot using ESP8266 
+*	PP5MGT - Marcelo
+*	pp5mgt@qsl.net
+*/
+
 /* Library used by ESP8266 */
 #include <ESP8266WiFi.h>
 
 /* Wifi parameters */
-const char* ssid     = "Wifi_SSID";
-const char* password = "WiFiPassword";
+const char* ssid     = "Wi-Fi SSID";
+const char* password = "Wi-Fi Passowrd";
 
 /* APRS server */
 char SVR_NAME[] = "brazil.d2g.com";
@@ -43,10 +49,10 @@ char SVR_NAME[] = "brazil.d2g.com";
 #define sta_symbol "`"
 
 /* Define your comment */
-#define comment "Arduino APRS-IS - pp5mgt@qsl.net"
+#define comment "ESP8266 APRS - pp5mgt@qsl.net"
 
 /* Update interval in minutes */
-int REPORT_INTERVAL = 10;
+int REPORT_INTERVAL = 15;
 
 /***************************************************************/
 
