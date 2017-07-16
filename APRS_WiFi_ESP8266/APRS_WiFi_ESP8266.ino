@@ -1,7 +1,7 @@
 /*
-*	APRS Spot using ESP8266 
-*	PP5MGT - Marcelo
-*	pp5mgt@qsl.net
+	APRS Spot using ESP8266
+	PP5MGT - Marcelo
+	pp5mgt@qsl.net
 */
 
 /* Library used by ESP8266 */
@@ -20,17 +20,17 @@ char SVR_NAME[] = "brazil.d2g.com";
 /***************************************************************/
 
 /* Define your callsign, passcode*/
-#define callsign "PP5MGT-1"
+#define callsign "PP5XXX"
 #define passcode "00000"
 
 /*
-    Usar o exemplo do link:
-    Obter pelo Google Maps:
+    Get location on Google Maps:
     Latitude -27.590348 Longitude -48.519487
-    Converter para o formato reconhecido pelo APRS:
+    APRS coordinate converter:
     http://digined.pe1mew.nl/?How_to:Convert_coordinates
     Latitude 2735.42S Longitude 048.31.17W
 */
+
 /* Define your location */
 #define location "2735.42S/04831.17W"
 
@@ -49,7 +49,7 @@ char SVR_NAME[] = "brazil.d2g.com";
 #define sta_symbol "`"
 
 /* Define your comment */
-#define comment "ESP8266 APRS - pp5mgt@qsl.net"
+#define comment "APRS ESP8266 - pp5mgt@qsl.net"
 
 /* Update interval in minutes */
 int REPORT_INTERVAL = 15;
@@ -58,7 +58,7 @@ int REPORT_INTERVAL = 15;
 
 /* Don not change anything bellow */
 
-#define VER "1.0"
+#define VER "1.01"
 #define SVR_VERIFIED "verified"
 
 #define TO_LINE  10000
@@ -66,34 +66,37 @@ int REPORT_INTERVAL = 15;
 // Use WiFiClient class to create TCP connections
 WiFiClient client;
 
+boolean sent; 
+
 void setup() {
   Serial.begin(9600);
-  delay(10);
+  delay(5);
+
+  Serial.println("-----------------------------------------\n");
+
+  Serial.print("APRS8266 ");
+  Serial.println(VER);
 
   // We start by connecting to a WiFi network
+  init_wifi();
 
-  Serial.println();
-  Serial.println();
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
+  // Print user information
+  Serial.print("\nCallsing: ");
+  Serial.println(callsign);
 
-  WiFi.begin(ssid, password);
+  Serial.print("Location: ");
+  Serial.println(location);
 
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("");
-  Serial.println("WiFi connected");
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
-  Serial.println("");
+  Serial.print("Report interval in minutes: ");
+  Serial.println(REPORT_INTERVAL);
+
+  Serial.println("\n-----------------------------------------\n");
+
 }
-
-
 
 void loop() {
 
+  sent = false;
   if ( client.connect(SVR_NAME, SVR_PORT) )
   {
     Serial.println("Server connected");
@@ -101,20 +104,22 @@ void loop() {
     client.print(callsign);
     client.print(" pass ");
     client.print(passcode);
-    client.print(" vers ESPAPRS ");
+    client.print(" vers APRS8266 ");
     client.println(VER);
     if ( wait4content(&client, SVR_VERIFIED, 8) )
     {
       Serial.println("Login OK");
       client.print(callsign);
-      client.print(">APRS,TCPIP*,qAC,WIDE1-1,WIDE2-1,BRASIL:@000000h");
+      client.print(">APE001,TCPIP*,qAC,WIDE1-1,WIDE2-1,BRASIL:!");
       client.print(location);
       client.print(sta_symbol);
       client.print(comment);
       Serial.println("Data sent OK");
-      delay(5000);
+      delay(2000);
       client.stop();
       Serial.println("Server disconnected\n");
+      sent = true;
+      
       delay((long)REPORT_INTERVAL * 60L * 1000L);
     }
     else
@@ -126,7 +131,28 @@ void loop() {
   {
     Serial.println("Can not connect to the server.");
   }
+  // If don't send data, reconect WiFi network
+  if (!sent) init_wifi();
 
+}
+
+/* Connect to WiFi */
+void init_wifi()
+{
+  Serial.println();
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
+
+  WiFi.begin(ssid, password);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println();
+  Serial.println("WiFi connected");
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
 }
 
 boolean wait4content(Stream* stream, char *target, int targetLen)
