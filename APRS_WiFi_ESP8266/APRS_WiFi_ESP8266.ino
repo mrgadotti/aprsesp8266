@@ -63,15 +63,21 @@ int REPORT_INTERVAL = 15;
 
 #define TO_LINE  10000
 
+#define BT_BEACON  2
+
 // Use WiFiClient class to create TCP connections
 WiFiClient client;
 
 boolean sent; 
+long interval = 0; 
+long time_elapsed;
 
 void setup() {
   Serial.begin(9600);
   delay(5);
 
+  pinMode(BT_BEACON, INPUT);
+  
   Serial.println("-----------------------------------------\n");
 
   Serial.print("APRS8266 ");
@@ -119,8 +125,20 @@ void loop() {
       client.stop();
       Serial.println("Server disconnected\n");
       sent = true;
-      
-      delay((long)REPORT_INTERVAL * 60L * 1000L);
+
+      interval = (long)REPORT_INTERVAL * 60L * 1000L;
+      time_elapsed = 0;
+      //delay((long)REPORT_INTERVAL * 60L * 1000L);
+
+      //Serial.println(digitalRead(BT_BEACON));
+      while (time_elapsed < interval)
+      {
+        
+        if (!digitalRead(BT_BEACON)) break;
+        time_elapsed++;
+        delay(1);
+      }
+      time_elapsed = 0;
     }
     else
     {
@@ -203,4 +221,3 @@ boolean wait4content(Stream* stream, char *target, int targetLen)
   }
   return ret;
 }
-
