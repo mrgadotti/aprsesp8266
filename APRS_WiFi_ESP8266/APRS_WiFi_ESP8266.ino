@@ -209,7 +209,7 @@ unsigned char send_beacon(String user, String passwd, String location, String sy
       // Insert your comment
       Serial.print("Comment: ");
       Serial.println(comment);
-      client.print(location);
+      client.print(comment);
       // Do not change below
       Serial.println("Data sent");
       delay(2000);
